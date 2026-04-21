@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ajay Kumar | Salesforce Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --sf-blue: #00A1E0;
+  --sf-dark: #032D60;
+  --sf-mid: #0176d3;
+  --sf-light: #e8f4fd;
+  --sf-accent: #00D4FF;
+  --sf-glow: rgba(0,161,224,0.4);
+  --white: #ffffff;
+  --gray-100: #f0f7ff;
+  --gray-600: #4a5568;
+  --text: #0d1b2a;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #040e1f;
+  color: var(--white);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CUSTOM CURSOR ─── */
+#cursor {
+  width: 12px; height: 12px;
+  background: var(--sf-accent);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: screen;
+}
+#cursor-ring {
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(0,212,255,0.5);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease-out, width 0.3s, height 0.3s, opacity 0.2s;
+}
+body:hover #cursor-ring { opacity: 1; }
+
+/* ─── NAVBAR ─── */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 1000;
+  padding: 18px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(4, 14, 31, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,161,224,0.12);
+  transition: all 0.3s;
+}
+nav.scrolled {
+  padding: 12px 60px;
+  background: rgba(4,14,31,0.95);
+  box-shadow: 0 4px 40px rgba(0,0,0,0.5);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+  color: var(--white); text-decoration: none;
+}
+.nav-logo .logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--sf-blue), var(--sf-dark));
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 0 20px var(--sf-glow);
+}
+.nav-links { display: flex; align-items: center; gap: 36px; }
+.nav-links a {
+  color: rgba(255,255,255,0.7); text-decoration: none;
+  font-size: 14px; font-weight: 500; letter-spacing: 0.03em;
+  transition: color 0.2s; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 1.5px; background: var(--sf-accent);
+  transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  background: linear-gradient(135deg, var(--sf-blue), var(--sf-mid));
+  color: white !important; padding: 9px 22px; border-radius: 50px;
+  box-shadow: 0 0 20px rgba(0,161,224,0.3);
+  transition: box-shadow 0.3s, transform 0.2s !important;
+}
+.nav-cta:hover { box-shadow: 0 0 35px rgba(0,161,224,0.6) !important; transform: translateY(-1px); }
+.nav-cta::after { display: none !important; }
+
+#hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+#hamburger span { width: 24px; height: 2px; background: white; border-radius: 2px; transition: 0.3s; }
+
+/* ─── HERO ─── */
+#hero {
+  position: relative; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+#three-canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0;
+}
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center; max-width: 900px; padding: 0 24px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,161,224,0.12); border: 1px solid rgba(0,161,224,0.3);
+  padding: 8px 20px; border-radius: 50px; margin-bottom: 28px;
+  font-size: 13px; color: var(--sf-accent); letter-spacing: 0.08em; text-transform: uppercase;
+  animation: fadeUp 0.8s both;
+}
+.hero-badge .dot { width: 7px; height: 7px; background: var(--sf-accent); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+h1.hero-title {
+  font-family: 'Syne', sans-serif; font-size: clamp(52px, 8vw, 96px);
+  font-weight: 800; line-height: 1.0; margin-bottom: 24px;
+  animation: fadeUp 0.8s 0.15s both;
+}
+.hero-title .line1 { display: block; color: var(--white); }
+.hero-title .line2 {
+  display: block;
+  background: linear-gradient(90deg, var(--sf-blue), var(--sf-accent), var(--sf-blue));
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: shimmer 3s linear infinite, fadeUp 0.8s 0.15s both;
+}
+@keyframes shimmer { to { background-position: 200% center; } }
+.hero-sub {
+  font-size: 18px; color: rgba(255,255,255,0.6); max-width: 560px; margin: 0 auto 44px;
+  line-height: 1.7; font-weight: 300; animation: fadeUp 0.8s 0.3s both;
+}
+.hero-ctas {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  animation: fadeUp 0.8s 0.45s both;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--sf-blue), var(--sf-mid));
+  color: white; padding: 16px 36px; border-radius: 50px; font-weight: 600;
+  font-size: 15px; text-decoration: none; border: none; cursor: pointer;
+  box-shadow: 0 0 30px rgba(0,161,224,0.4);
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+.btn-primary:hover { box-shadow: 0 0 50px rgba(0,161,224,0.7); transform: translateY(-3px); }
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: white; padding: 15px 36px;
+  border-radius: 50px; font-weight: 600; font-size: 15px; text-decoration: none;
+  border: 1.5px solid rgba(255,255,255,0.25); cursor: pointer;
+  transition: border-color 0.3s, background 0.3s, transform 0.2s;
+}
+.btn-outline:hover { border-color: var(--sf-accent); background: rgba(0,212,255,0.08); transform: translateY(-3px); }
+
+.hero-socials {
+  display: flex; gap: 24px; justify-content: center; margin-top: 52px;
+  animation: fadeUp 0.8s 0.6s both;
+}
+.hero-socials a {
+  color: rgba(255,255,255,0.4); font-size: 20px; transition: color 0.3s, transform 0.3s;
+  text-decoration: none;
+}
+.hero-socials a:hover { color: var(--sf-accent); transform: translateY(-3px); }
+.hero-scroll-hint {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: rgba(255,255,255,0.3); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  animation: fadeUp 1s 1s both;
+}
+.scroll-line {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, rgba(0,161,224,0.7), transparent);
+  animation: scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine { 0%{transform:scaleY(0) translateY(-50%);opacity:1} 100%{transform:scaleY(1) translateY(0%);opacity:0} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+/* ─── SECTION SHARED ─── */
+section { padding: 120px 60px; }
+.section-label {
+  display: inline-block; font-size: 12px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--sf-blue); font-weight: 600; margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif; font-size: clamp(36px, 4vw, 56px);
+  font-weight: 800; line-height: 1.1; color: var(--white); margin-bottom: 20px;
+}
+.section-sub { color: rgba(255,255,255,0.5); font-size: 17px; font-weight: 300; max-width: 520px; line-height: 1.7; }
+.max-w { max-width: 1200px; margin: 0 auto; }
+
+/* ─── STATS STRIP ─── */
+#stats-strip {
+  background: rgba(0,161,224,0.06);
+  border-top: 1px solid rgba(0,161,224,0.1);
+  border-bottom: 1px solid rgba(0,161,224,0.1);
+  padding: 48px 60px;
+}
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; }
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800;
+  background: linear-gradient(135deg, var(--sf-blue), var(--sf-accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1;
+}
+.stat-label { color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 8px; letter-spacing: 0.05em; }
+
+/* ─── ABOUT ─── */
+#about { background: #050f20; }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.about-visual {
+  position: relative;
+}
+.about-card-3d {
+  background: linear-gradient(135deg, rgba(0,161,224,0.08), rgba(3,45,96,0.6));
+  border: 1px solid rgba(0,161,224,0.2);
+  border-radius: 24px; padding: 48px;
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease;
+  position: relative; overflow: hidden;
+}
+.about-card-3d::before {
+  content: ''; position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(0,161,224,0.08), transparent 50%);
+  pointer-events: none;
+}
+.about-avatar {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--sf-blue), var(--sf-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800; margin: 0 auto 24px;
+  box-shadow: 0 0 50px rgba(0,161,224,0.4);
+  border: 3px solid rgba(0,161,224,0.3);
+  position: relative; z-index: 1;
+}
+.about-name {
+  font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700;
+  text-align: center; margin-bottom: 4px;
+}
+.about-role {
+  color: var(--sf-accent); text-align: center; font-size: 14px; letter-spacing: 0.05em; margin-bottom: 32px;
+}
+.info-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.chip {
+  background: rgba(0,161,224,0.1); border: 1px solid rgba(0,161,224,0.2);
+  padding: 7px 16px; border-radius: 50px; font-size: 13px; color: rgba(255,255,255,0.8);
+  display: flex; align-items: center; gap: 7px;
+}
+.chip i { color: var(--sf-blue); }
+.about-text p {
+  color: rgba(255,255,255,0.65); font-size: 17px; line-height: 1.85; margin-bottom: 24px; font-weight: 300;
+}
+.skills-checklist {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 32px;
+}
+.check-item {
+  display: flex; align-items: center; gap: 12px;
+  color: rgba(255,255,255,0.75); font-size: 15px; font-weight: 500;
+}
+.check-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,161,224,0.15); border: 1px solid rgba(0,161,224,0.3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--sf-accent); font-size: 11px; flex-shrink: 0;
+}
+.experience-pill {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, rgba(0,161,224,0.15), rgba(3,45,96,0.4));
+  border: 1px solid rgba(0,161,224,0.25); border-radius: 60px;
+  padding: 12px 24px; margin-top: 36px;
+}
+.exp-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--sf-accent); }
+.exp-text { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+
+/* ─── SKILLS ─── */
+#skills { background: #040e1f; }
+.skills-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+.skill-bars-wrap { display: flex; flex-direction: column; gap: 28px; }
+.skill-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.skill-name { font-weight: 600; font-size: 15px; }
+.skill-pct { color: var(--sf-accent); font-weight: 700; font-size: 15px; }
+.skill-track {
+  height: 6px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden;
+}
+.skill-fill {
+  height: 100%; width: 0; border-radius: 10px;
+  background: linear-gradient(90deg, var(--sf-dark), var(--sf-blue), var(--sf-accent));
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+.tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.tool-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px; padding: 24px 18px; text-align: center;
+  transition: all 0.3s; cursor: default; position: relative; overflow: hidden;
+}
+.tool-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,161,224,0.08), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.tool-card:hover { border-color: rgba(0,161,224,0.35); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.3), 0 0 20px rgba(0,161,224,0.1); }
+.tool-card:hover::before { opacity: 1; }
+.tool-icon { font-size: 28px; color: var(--sf-blue); margin-bottom: 10px; display: block; }
+.tool-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
+.tool-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+/* ─── CERTIFICATIONS ─── */
+#certifications { background: #050f20; }
+.certs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+.cert-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 36px 28px;
+  transition: all 0.4s; position: relative; overflow: hidden;
+  transform-style: preserve-3d;
+}
+.cert-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--sf-blue), var(--sf-accent));
+  transform: scaleX(0); transition: transform 0.4s;
+}
+.cert-card:hover { transform: translateY(-8px) rotateX(3deg); border-color: rgba(0,161,224,0.3); box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,161,224,0.1); }
+.cert-card:hover::after { transform: scaleX(1); }
+.cert-icon-wrap {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(0,161,224,0.15), rgba(3,45,96,0.5));
+  border: 1px solid rgba(0,161,224,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--sf-blue); margin-bottom: 20px;
+}
+.cert-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.cert-badge { display: inline-block; background: rgba(0,161,224,0.12); border: 1px solid rgba(0,161,224,0.2); color: var(--sf-accent); font-size: 11px; padding: 4px 12px; border-radius: 50px; letter-spacing: 0.05em; }
+
+.trailhead-banner {
+  margin-top: 60px; border-radius: 24px; overflow: hidden; position: relative;
+  background: linear-gradient(135deg, #032D60, #0176d3, #032D60);
+  background-size: 200% auto; animation: shimmer 4s linear infinite;
+  padding: 64px; display: flex; align-items: center; justify-content: space-between; gap: 40px;
+  flex-wrap: wrap;
+}
+.trailhead-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.06) 1px, transparent 0);
+  background-size: 30px 30px; pointer-events: none;
+}
+.th-stats { display: flex; gap: 60px; flex-wrap: wrap; }
+.th-stat { text-align: center; }
+.th-num { font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800; line-height: 1; }
+.th-label { font-size: 13px; opacity: 0.6; margin-top: 6px; }
+.th-cta {
+  background: white; color: #032D60; padding: 14px 32px; border-radius: 50px;
+  font-weight: 700; font-size: 15px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s; white-space: nowrap;
+}
+.th-cta:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+
+/* ─── PROJECTS ─── */
+#projects { background: #040e1f; }
+.projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+.project-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px; overflow: hidden; transition: all 0.4s;
+  cursor: default;
+}
+.project-card:hover { transform: translateY(-10px); border-color: rgba(0,161,224,0.3); box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 40px rgba(0,161,224,0.08); }
+.project-thumb {
+  height: 180px; display: flex; align-items: center; justify-content: center;
+  font-size: 64px; color: rgba(255,255,255,0.2); position: relative; overflow: hidden;
+}
+.project-thumb .thumb-icon { position: relative; z-index: 1; transition: transform 0.4s; }
+.project-card:hover .thumb-icon { transform: scale(1.15) rotateY(20deg); }
+.project-thumb-glow {
+  position: absolute; inset: 0;
+  opacity: 0; transition: opacity 0.4s;
+}
+.project-card:hover .project-thumb-glow { opacity: 1; }
+.project-body { padding: 28px; }
+.project-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tag {
+  padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+}
+.tag-blue { background: rgba(0,161,224,0.15); color: var(--sf-blue); border: 1px solid rgba(0,161,224,0.25); }
+.tag-purple { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+.tag-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+.tag-orange { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+.project-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.project-desc { color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
+.project-meta { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+.project-year { font-size: 13px; color: rgba(255,255,255,0.3); }
+.project-arrow {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(0,161,224,0.3); display: flex; align-items: center; justify-content: center;
+  color: var(--sf-blue); font-size: 12px; transition: all 0.3s;
+}
+.project-card:hover .project-arrow { background: var(--sf-blue); color: white; border-color: var(--sf-blue); transform: rotate(45deg); }
+
+/* ─── CONTACT ─── */
+#contact { background: #050f20; }
+.contact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+.contact-items { display: flex; flex-direction: column; gap: 28px; margin-top: 44px; }
+.contact-item {
+  display: flex; align-items: flex-start; gap: 18px;
+  padding: 20px; border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  transition: all 0.3s;
+}
+.contact-item:hover { border-color: rgba(0,161,224,0.25); background: rgba(0,161,224,0.04); }
+.contact-icon {
+  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+  background: rgba(0,161,224,0.12); border: 1px solid rgba(0,161,224,0.2);
+  display: flex; align-items: center; justify-content: center; color: var(--sf-blue); font-size: 18px;
+}
+.contact-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+.contact-val { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.85); word-break: break-all; }
+.contact-val a { color: inherit; text-decoration: none; }
+.contact-val a:hover { color: var(--sf-accent); }
+
+/* ─── FORM ─── */
+.contact-form { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 40px; }
+.form-group { margin-bottom: 22px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); margin-bottom: 10px; letter-spacing: 0.04em; }
+.form-input, .form-textarea {
+  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 14px 18px; color: white; font-family: inherit; font-size: 15px;
+  outline: none; transition: all 0.3s; resize: none;
+}
+.form-input:focus, .form-textarea:focus {
+  border-color: var(--sf-blue); background: rgba(0,161,224,0.06);
+  box-shadow: 0 0 0 3px rgba(0,161,224,0.1);
+}
+.form-input::placeholder, .form-textarea::placeholder { color: rgba(255,255,255,0.2); }
+.form-textarea { min-height: 120px; }
+.form-submit {
+  width: 100%; background: linear-gradient(135deg, var(--sf-blue), var(--sf-mid));
+  border: none; color: white; padding: 16px; border-radius: 12px;
+  font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer;
+  transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 8px 30px rgba(0,161,224,0.3);
+}
+.form-submit:hover { box-shadow: 0 12px 40px rgba(0,161,224,0.5); transform: translateY(-2px); }
+.form-submit:active { transform: translateY(0); }
+.form-submit.success { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 8px 30px rgba(16,185,129,0.3); }
+
+/* ─── FOOTER ─── */
+footer {
+  background: #030a15; border-top: 1px solid rgba(0,161,224,0.1);
+  padding: 60px; display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 24px;
+}
+.footer-brand { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+.footer-sub { color: rgba(255,255,255,0.3); font-size: 13px; margin-top: 4px; }
+.footer-links { display: flex; gap: 28px; }
+.footer-links a { color: rgba(255,255,255,0.4); font-size: 20px; transition: color 0.2s, transform 0.2s; text-decoration: none; }
+.footer-links a:hover { color: var(--sf-accent); transform: translateY(-3px); }
+.footer-copy { width: 100%; text-align: center; color: rgba(255,255,255,0.2); font-size: 13px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.04); margin-top: 12px; }
+
+/* ─── REVEAL ANIMATION ─── */
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s, transform 0.8s; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── TOAST ─── */
+#toast {
+  position: fixed; bottom: 40px; right: 40px; z-index: 9999;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white; padding: 16px 28px; border-radius: 12px;
+  font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4); opacity: 0; transform: translateY(20px);
+  transition: all 0.4s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ─── FLOATING PARTICLES ─── */
+.particles-wrap { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.particle {
+  position: absolute; border-radius: 50%;
+  background: var(--sf-blue); opacity: 0.3;
+  animation: floatParticle linear infinite;
+}
+@keyframes floatParticle {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.1; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 900px) {
+  nav { padding: 16px 24px; }
+  nav.scrolled { padding: 12px 24px; }
+  .nav-links { display: none; }
+  #hamburger { display: flex; }
+  .mobile-nav-open .nav-links {
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100vh; background: rgba(4,14,31,0.98);
+    justify-content: center; align-items: center; gap: 40px; font-size: 24px;
+    z-index: 999;
+  }
+  section { padding: 80px 24px; }
+  #stats-strip { padding: 40px 24px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .about-grid { grid-template-columns: 1fr; gap: 48px; }
+  .skills-layout { grid-template-columns: 1fr; gap: 48px; }
+  .certs-grid { grid-template-columns: 1fr; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .contact-layout { grid-template-columns: 1fr; gap: 48px; }
+  .trailhead-banner { padding: 40px; }
+  footer { flex-direction: column; text-align: center; padding: 40px 24px; }
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  .skills-checklist { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a class="nav-logo" href="#hero">
+    <div class="logo-icon"><i class="fab fa-salesforce"></i></div>
+    Ajay Kumar
+  </a>
+  <div class="nav-links" id="nav-links">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#certifications">Certs</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact" class="nav-cta">Hire Me</a>
+  </div>
+  <div id="hamburger" onclick="toggleMenu()">
+    <span id="h1"></span><span id="h2"></span><span id="h3"></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="three-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-badge"><div class="dot"></div>Available for new opportunities</div>
+    <h1 class="hero-title">
+      <span class="line1">Transforming Business</span>
+      <span class="line2">Through Salesforce</span>
+    </h1>
+    <p class="hero-sub">Salesforce Developer & Administrator crafting custom Apex solutions, Lightning Web Components, and seamless CRM integrations that drive real ROI.</p>
+    <div class="hero-ctas">
+      <a href="#projects" class="btn-primary"><i class="fas fa-rocket"></i> View My Work</a>
+      <a href="https://www.salesforce.com/trailblazer/akumar8067" target="_blank" class="btn-outline"><i class="fas fa-mountain"></i> Trailhead Profile</a>
+    </div>
+    <div class="hero-socials">
+      <a href="https://www.linkedin.com/in/ajay-kumar-476529213/" target="_blank"><i class="fab fa-linkedin"></i></a>
+      <a href="#" target="_blank"><i class="fab fa-github"></i></a>
+      <a href="mailto:Kumarajay83072@gmail.com"><i class="fas fa-envelope"></i></a>
+      <a href="https://www.salesforce.com/trailblazer/akumar8067" target="_blank"><i class="fas fa-mountain"></i></a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div id="stats-strip" class="reveal">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-num" data-count="2.5" data-suffix="+">0</div>
+      <div class="stat-label">Years Experience</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-count="200" data-suffix="+">0</div>
+      <div class="stat-label">Trailhead Badges</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-count="110" data-suffix="K+">0</div>
+      <div class="stat-label">Trailhead Points</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-count="3" data-suffix="">0</div>
+      <div class="stat-label">Salesforce Certifications</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="max-w">
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="about-card-3d" id="tiltCard">
+          <div class="about-avatar">AK</div>
+          <div class="about-name">Ajay Kumar</div>
+          <div class="about-role">Salesforce Developer & Administrator</div>
+          <div class="info-chips">
+            <div class="chip"><i class="fas fa-map-marker-alt"></i>Chandigarh, India</div>
+            <div class="chip"><i class="fas fa-wifi"></i>Remote Available</div>
+            <div class="chip"><i class="fas fa-star"></i>Double Star Ranger</div>
+            <div class="chip"><i class="fas fa-check-circle"></i>3x Certified</div>
+          </div>
+          <div class="experience-pill">
+            <div class="exp-num">2.5+</div>
+            <div class="exp-text">Years of<br>Salesforce expertise</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-text reveal">
+        <div class="section-label">About Me</div>
+        <h2 class="section-title">Bridging Business & Technology</h2>
+        <p>I'm a passionate Salesforce Developer dedicated to helping businesses harness the full power of the Salesforce platform. My expertise spans Apex, Lightning Web Components, and process automation — building solutions that don't just work, but transform the way teams operate.</p>
+        <p>My approach combines technical excellence with deep business process understanding, ensuring every implementation delivers real ROI and strong user adoption from day one.</p>
+        <div class="skills-checklist">
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div>Apex & Visualforce</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div>Lightning Web Components</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div>Flow & Process Automation</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div>REST / SOAP Integration</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div>SOQL & SOSL Queries</div>
+          <div class="check-item"><div class="check-icon"><i class="fas fa-check"></i></div>Sales & Service Cloud</div>
+        </div>
+        <div style="margin-top:36px;">
+          <a href="#contact" class="btn-primary" style="display:inline-flex;">Let's work together <i class="fas fa-arrow-right" style="margin-left:8px"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="max-w">
+    <div class="skills-layout">
+      <div class="reveal">
+        <div class="section-label">Expertise</div>
+        <h2 class="section-title">Technical Skills</h2>
+        <p class="section-sub" style="margin-bottom:44px">Proficient across the full Salesforce development lifecycle — from requirements to deployment.</p>
+        <div class="skill-bars-wrap" id="skillBars">
+          <div class="skill-row">
+            <div class="skill-header"><span class="skill-name">Apex & Visualforce</span><span class="skill-pct">95%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="95"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-header"><span class="skill-name">Lightning Web Components</span><span class="skill-pct">90%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="90"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-header"><span class="skill-name">Flow & Process Builder</span><span class="skill-pct">95%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="95"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-header"><span class="skill-name">SOQL & SOSL</span><span class="skill-pct">92%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="92"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-header"><span class="skill-name">Salesforce APIs & Integration</span><span class="skill-pct">85%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="85"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="section-label">Tools & Platforms</div>
+        <h2 class="section-title">Tech Stack</h2>
+        <p class="section-sub" style="margin-bottom:36px">The ecosystem I use to deliver great Salesforce solutions.</p>
+        <div class="tools-grid">
+          <div class="tool-card"><i class="fab fa-salesforce tool-icon"></i><div class="tool-name">Sales Cloud</div><div class="tool-sub">CRM Implementation</div></div>
+          <div class="tool-card"><i class="fas fa-headset tool-icon"></i><div class="tool-name">Service Cloud</div><div class="tool-sub">Case Management</div></div>
+          <div class="tool-card"><i class="fas fa-code tool-icon"></i><div class="tool-name">VS Code</div><div class="tool-sub">SFDX & Dev</div></div>
+          <div class="tool-card"><i class="fas fa-database tool-icon"></i><div class="tool-name">Data Loader</div><div class="tool-sub">Data Management</div></div>
+          <div class="tool-card"><i class="fab fa-git-alt tool-icon"></i><div class="tool-name">Git & GitHub</div><div class="tool-sub">Version Control</div></div>
+          <div class="tool-card"><i class="fas fa-bolt tool-icon"></i><div class="tool-name">Flow Builder</div><div class="tool-sub">Automation</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="max-w">
+    <div class="reveal" style="text-align:center; max-width:600px; margin:0 auto 0">
+      <div class="section-label">Credentials</div>
+      <h2 class="section-title">Certifications</h2>
+      <p class="section-sub" style="margin:0 auto">Continuously expanding expertise through Salesforce certifications and hands-on Trailhead learning.</p>
+    </div>
+    <div class="certs-grid">
+      <div class="cert-card reveal">
+        <div class="cert-icon-wrap"><i class="fas fa-certificate"></i></div>
+        <div class="cert-title">Platform Developer I</div>
+        <p style="color:rgba(255,255,255,0.45);font-size:14px;margin-bottom:16px">Custom Apex, triggers, and LWC development expertise validated by Salesforce.</p>
+        <span class="cert-badge">Certified Professional</span>
+      </div>
+      <div class="cert-card reveal">
+        <div class="cert-icon-wrap"><i class="fas fa-user-shield"></i></div>
+        <div class="cert-title">Administrator</div>
+        <p style="color:rgba(255,255,255,0.45);font-size:14px;margin-bottom:16px">Security model, data management, and configuration skills across all core clouds.</p>
+        <span class="cert-badge">Certified Professional</span>
+      </div>
+      <div class="cert-card reveal">
+        <div class="cert-icon-wrap"><i class="fas fa-cloud"></i></div>
+        <div class="cert-title">Platform Developer II</div>
+        <p style="color:rgba(255,255,255,0.45);font-size:14px;margin-bottom:16px">Advanced integration patterns, data modeling, and large-scale system design.</p>
+        <span class="cert-badge">Certified Professional</span>
+      </div>
+    </div>
+
+    <div class="trailhead-banner reveal">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px">Trailhead Journey</div>
+        <div style="opacity:0.6;font-size:15px">Double Star Ranger — Continuously learning & earning</div>
+      </div>
+      <div class="th-stats">
+        <div class="th-stat"><div class="th-num">200+</div><div class="th-label">Badges</div></div>
+        <div class="th-stat"><div class="th-num">110K+</div><div class="th-label">Points</div></div>
+        <div class="th-stat"><div class="th-num">⭐⭐</div><div class="th-label">Star Ranger</div></div>
+      </div>
+      <a href="https://www.salesforce.com/trailblazer/akumar8067" target="_blank" class="th-cta">
+        <i class="fas fa-mountain"></i> View Trailhead Profile
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="max-w">
+    <div class="reveal" style="text-align:center; max-width:600px; margin:0 auto">
+      <div class="section-label">Portfolio</div>
+      <h2 class="section-title">Featured Projects</h2>
+      <p class="section-sub" style="margin:0 auto">Real-world Salesforce solutions delivering measurable business impact.</p>
+    </div>
+    <div class="projects-grid">
+
+      <!-- 1. KEI Industries -->
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#032D60,#0176d3)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(0,212,255,0.2),transparent)"></div>
+          <i class="fas fa-industry thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-blue">Development</span><span class="tag tag-purple">Apex</span><span class="tag tag-orange">API Integration</span></div>
+          <div class="project-title">KEI Wires and Cables</div>
+          <div class="project-desc">Built custom Salesforce solutions from scratch for KEI Industries, including end-to-end API integrations that streamlined inter-system data flow and reduced manual data entry across departments.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2026</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+
+      <!-- 2. MAX Estates -->
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#1e3a5f,#0176d3)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(0,161,224,0.2),transparent)"></div>
+          <i class="fas fa-building thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-blue">Integration</span><span class="tag tag-orange">REST / SOAP</span><span class="tag tag-blue">CG</span></div>
+          <div class="project-title">MAX Estates</div>
+          <div class="project-desc">Implemented REST and SOAP API integrations alongside standard Salesforce connectors for MAX Estates, enhancing real-estate pipeline visibility and enabling seamless cross-platform data synchronization.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2026</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+
+      <!-- 3. Stylam Industries -->
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#065f46,#0d9488)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(52,211,153,0.2),transparent)"></div>
+          <i class="fas fa-tools thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-green">Development</span><span class="tag tag-purple">Apex</span><span class="tag tag-green">Managed Services</span></div>
+          <div class="project-title">Stylam Industries</div>
+          <div class="project-desc">Delivered new feature implementations and ongoing managed services for Stylam Industries, including root cause analysis (RCA) for production issues and proactive system health monitoring.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2026</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+
+      <!-- 4. RDC Portal -->
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(167,139,250,0.2),transparent)"></div>
+          <i class="fas fa-users thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-purple">LWC</span><span class="tag tag-blue">Apex</span><span class="tag tag-blue">CG</span></div>
+          <div class="project-title">RDC Self-Service Portal</div>
+          <div class="project-desc">Designed and implemented a custom Lightning Web Component portal for RDC users, boosting self-service adoption by 45% and enabling real-time data sync — significantly reducing support ticket volume.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2026</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(167,139,250,0.2),transparent)"></div>
+          <i class="fas fa-file-invoice-dollar thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-purple">Visualforce</span><span class="tag tag-green">Apex</span></div>
+          <div class="project-title">Custom Quote Generation</div>
+          <div class="project-desc">Real-time quote generation component that produces polished PDF quotes for selected products directly from Lead records.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2023</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#0d9488,#059669)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(52,211,153,0.2),transparent)"></div>
+          <i class="fas fa-route thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-blue">Flow</span><span class="tag tag-green">Automation</span></div>
+          <div class="project-title">Lead Auto-Assignment Engine</div>
+          <div class="project-desc">Complex Flow automation with Apex triggers slashing lead response time from 24 hours to under 5 minutes — a 99% improvement.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2023</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#b45309,#d97706)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(251,191,36,0.2),transparent)"></div>
+          <i class="fas fa-envelope-open-text thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-orange">Integration</span><span class="tag tag-blue">REST API</span></div>
+          <div class="project-title">Outlook Configuration</div>
+          <div class="project-desc">Built a real-time lead generation LWC that enables sales reps to create and sync Salesforce leads directly from Microsoft Outlook.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2023</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#be185d,#9d174d)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(244,114,182,0.2),transparent)"></div>
+          <i class="fas fa-chart-line thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-purple">Reports</span><span class="tag tag-blue">Dashboards</span></div>
+          <div class="project-title">Sales Analytics Dashboard</div>
+          <div class="project-desc">Custom Salesforce dashboards providing real-time pipeline visibility, forecasting accuracy, and rep performance insights for leadership.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2024</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb" style="background:linear-gradient(135deg,#0f172a,#1e3a5f)">
+          <div class="project-thumb-glow" style="background:radial-gradient(circle,rgba(0,161,224,0.15),transparent)"></div>
+          <i class="fas fa-shield-alt thumb-icon"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-tags"><span class="tag tag-blue">Security</span><span class="tag tag-green">Admin</span></div>
+          <div class="project-title">Org Security Audit</div>
+          <div class="project-desc">Comprehensive Salesforce security review covering profiles, permission sets, sharing rules, and field-level security for compliance readiness.</div>
+          <div class="project-meta"><span class="project-year"><i class="far fa-calendar" style="margin-right:6px"></i>2024</span><div class="project-arrow"><i class="fas fa-arrow-up-right-from-square"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="max-w">
+    <div class="reveal" style="text-align:center;max-width:540px;margin:0 auto 64px">
+      <div class="section-label">Get In Touch</div>
+      <h2 class="section-title">Let's Connect</h2>
+      <p class="section-sub" style="margin:0 auto">Have a project in mind or want to discuss Salesforce solutions? I'd love to hear from you.</p>
+    </div>
+    <div class="contact-layout">
+      <div class="reveal">
+        <h3 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px">Reach out directly</h3>
+        <p style="color:rgba(255,255,255,0.45);font-size:15px;line-height:1.7">Open to freelance projects, full-time roles, and Salesforce consulting engagements. Remote-friendly.</p>
+        <div class="contact-items">
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+            <div><div class="contact-label">Email</div><div class="contact-val"><a href="mailto:Kumarajay83072@gmail.com">Kumarajay83072@gmail.com</a></div></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fab fa-linkedin"></i></div>
+            <div><div class="contact-label">LinkedIn</div><div class="contact-val"><a href="https://www.linkedin.com/in/ajay-kumar-476529213/" target="_blank">ajay-kumar-476529213</a></div></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-mountain"></i></div>
+            <div><div class="contact-label">Trailhead</div><div class="contact-val"><a href="https://www.salesforce.com/trailblazer/akumar8067" target="_blank">trailblazer/akumar8067</a></div></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div><div class="contact-label">Location</div><div class="contact-val">Chandigarh, India · Remote Available</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form reveal">
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:28px">Send a message</div>
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input class="form-input" id="fname" type="text" placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" id="femail" type="email" placeholder="john@company.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <input class="form-input" id="fsubject" type="text" placeholder="Salesforce project inquiry">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea class="form-textarea" id="fmessage" placeholder="Tell me about your project..."></textarea>
+        </div>
+        <button class="form-submit" id="submitBtn" onclick="submitForm()">
+          <i class="fas fa-paper-plane"></i> Send Message
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand"><i class="fab fa-salesforce" style="color:var(--sf-blue);margin-right:10px"></i>Ajay Kumar</div>
+    <div class="footer-sub">Salesforce Developer & Administrator · Chandigarh</div>
+  </div>
+  <div class="footer-links">
+    <a href="https://www.linkedin.com/in/ajay-kumar-476529213/" target="_blank"><i class="fab fa-linkedin"></i></a>
+    <a href="#" target="_blank"><i class="fab fa-github"></i></a>
+    <a href="https://www.salesforce.com/trailblazer/akumar8067" target="_blank"><i class="fas fa-mountain"></i></a>
+    <a href="mailto:Kumarajay83072@gmail.com"><i class="fas fa-envelope"></i></a>
+  </div>
+  <div class="footer-copy">© 2026 Ajay Kumar. All rights reserved. Crafted with <span style="color:#e53e3e">♥</span> & Salesforce</div>
+</footer>
+
+<div id="toast"><i class="fas fa-check-circle"></i> Message sent! I'll get back to you soon.</div>
+
+<script>
+/* ─── CURSOR ─── */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+document.querySelectorAll('a,button,.project-card,.cert-card,.tool-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='6px';cursor.style.height='6px';ring.style.width='56px';ring.style.height='56px';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='12px';cursor.style.height='12px';ring.style.width='36px';ring.style.height='36px';});
+});
+
+/* ─── THREE.JS 3D HERO ─── */
+(function(){
+  const canvas = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.z = 5;
+
+  function resize(){
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  // Floating particle spheres
+  const geo = new THREE.BufferGeometry();
+  const N = 1800;
+  const pos = new Float32Array(N*3);
+  const sizes = new Float32Array(N);
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-0.5)*18;
+    pos[i*3+1]=(Math.random()-0.5)*18;
+    pos[i*3+2]=(Math.random()-0.5)*18;
+    sizes[i]=Math.random()*2.5+0.5;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('size', new THREE.BufferAttribute(sizes,1));
+
+  const mat = new THREE.PointsMaterial({
+    color: 0x00A1E0, size: 0.05, sizeAttenuation: true,
+    transparent: true, opacity: 0.6
+  });
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  // Wireframe torus
+  const torusGeo = new THREE.TorusKnotGeometry(2, 0.5, 120, 16);
+  const torusMat = new THREE.MeshBasicMaterial({color:0x00A1E0, wireframe:true, transparent:true, opacity:0.08});
+  const torus = new THREE.Mesh(torusGeo, torusMat);
+  scene.add(torus);
+
+  // Outer ring
+  const ringGeo = new THREE.TorusGeometry(3.5, 0.012, 8, 120);
+  const ringMat = new THREE.MeshBasicMaterial({color:0x00D4FF, transparent:true, opacity:0.15});
+  const ring3d = new THREE.Mesh(ringGeo, ringMat);
+  ring3d.rotation.x = 1.2;
+  scene.add(ring3d);
+
+  let mouseX=0, mouseY=0;
+  document.addEventListener('mousemove', e=>{
+    mouseX=(e.clientX/window.innerWidth-0.5)*2;
+    mouseY=(e.clientY/window.innerHeight-0.5)*2;
+  });
+
+  let t=0;
+  (function animate(){
+    requestAnimationFrame(animate); t+=0.005;
+    points.rotation.y=t*0.1; points.rotation.x=t*0.05;
+    torus.rotation.x+=0.003; torus.rotation.y+=0.005;
+    ring3d.rotation.z+=0.002;
+    camera.position.x += (mouseX*0.5 - camera.position.x)*0.04;
+    camera.position.y += (-mouseY*0.3 - camera.position.y)*0.04;
+    camera.lookAt(scene.position);
+    renderer.render(scene, camera);
+  })();
+})();
+
+/* ─── NAVBAR SCROLL ─── */
+window.addEventListener('scroll',()=>{
+  const nav = document.getElementById('navbar');
+  nav.classList.toggle('scrolled', window.scrollY>60);
+});
+
+/* ─── HAMBURGER ─── */
+let menuOpen=false;
+function toggleMenu(){
+  menuOpen=!menuOpen;
+  const nav = document.getElementById('navbar');
+  nav.classList.toggle('mobile-nav-open', menuOpen);
+  document.getElementById('h1').style.transform=menuOpen?'rotate(45deg) translate(5px,5px)':'';
+  document.getElementById('h2').style.opacity=menuOpen?'0':'1';
+  document.getElementById('h3').style.transform=menuOpen?'rotate(-45deg) translate(5px,-5px)':'';
+}
+document.querySelectorAll('#nav-links a').forEach(a=>a.addEventListener('click',()=>{if(menuOpen)toggleMenu();}));
+
+/* ─── INTERSECTION OBSERVER: REVEAL ─── */
+const revealObs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),100); revealObs.unobserve(e.target); }
+  });
+},{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+
+/* ─── SKILL BARS ─── */
+const skillObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.skill-fill').forEach(bar=>{
+        const pct = bar.getAttribute('data-pct');
+        setTimeout(()=>bar.style.width=pct+'%', 200);
+      });
+      skillObs.unobserve(e.target);
+    }
+  });
+},{threshold:0.3});
+const skillSection = document.getElementById('skillBars');
+if(skillSection) skillObs.observe(skillSection);
+
+/* ─── COUNTER ANIMATION ─── */
+function animateCounter(el){
+  const target = parseFloat(el.getAttribute('data-count'));
+  const suffix = el.getAttribute('data-suffix');
+  const dec = target % 1 !== 0;
+  let start=0, duration=1800;
+  const step=(timestamp)=>{
+    if(!start) start=timestamp;
+    const progress=Math.min((timestamp-start)/duration,1);
+    const val = progress*target;
+    el.textContent = (dec?val.toFixed(1):Math.floor(val)) + suffix;
+    if(progress<1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+const counterObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('[data-count]').forEach(animateCounter);
+      counterObs.unobserve(e.target);
+    }
+  });
+},{threshold:0.5});
+document.querySelectorAll('#stats-strip').forEach(el=>counterObs.observe(el));
+
+/* ─── 3D CARD TILT ─── */
+const tiltCard = document.getElementById('tiltCard');
+if(tiltCard){
+  tiltCard.addEventListener('mousemove',e=>{
+    const r=tiltCard.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-0.5;
+    const y=(e.clientY-r.top)/r.height-0.5;
+    tiltCard.style.transform=`rotateY(${x*18}deg) rotateX(${-y*12}deg) scale(1.02)`;
+    tiltCard.style.setProperty('--mx',(x+0.5)*100+'%');
+    tiltCard.style.setProperty('--my',(y+0.5)*100+'%');
+  });
+  tiltCard.addEventListener('mouseleave',()=>{
+    tiltCard.style.transform='rotateY(0deg) rotateX(0deg) scale(1)';
+  });
+}
+
+/* ─── FORM SUBMIT ─── */
+function submitForm(){
+  const name=document.getElementById('fname').value.trim();
+  const email=document.getElementById('femail').value.trim();
+  const msg=document.getElementById('fmessage').value.trim();
+  if(!name||!email||!msg){ alert('Please fill in name, email, and message.'); return; }
+  const btn=document.getElementById('submitBtn');
+  btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Sending...';
+  btn.disabled=true;
+  setTimeout(()=>{
+    btn.innerHTML='<i class="fas fa-check"></i> Message Sent!';
+    btn.classList.add('success');
+    document.getElementById('fname').value='';
+    document.getElementById('femail').value='';
+    document.getElementById('fsubject').value='';
+    document.getElementById('fmessage').value='';
+    const toast=document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),4000);
+    setTimeout(()=>{btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Message';btn.classList.remove('success');btn.disabled=false;},3000);
+  },1600);
+}
+
+/* ─── SMOOTH SCROLL ─── */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const el=document.querySelector(a.getAttribute('href'));
+    if(el) el.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
