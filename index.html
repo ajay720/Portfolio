@@ -923,7 +923,7 @@ const OWNER_EMAIL         = 'ajay.stylamind@gmail.com';
 // ── Initialise EmailJS once the SDK is ready ──────────────────
 function initEmailJS() {
   if (typeof emailjs !== 'undefined') {
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    emailjs.init(EMAILJS_PUBLIC_KEY);
     console.log('[EmailJS] Initialised successfully.');
   } else {
     console.warn('[EmailJS] SDK not loaded yet — will retry.');
